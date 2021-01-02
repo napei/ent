@@ -28,6 +28,11 @@ func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
 	if err != nil {
 		return nil, err
 	}
+	return LoadGraphFrom(spec, cfg)
+}
+
+// LoadGraphFrom will load a graph from an existing SchemaSpec
+func LoadGraphFrom(spec *load.SchemaSpec, cfg *gen.Config) (*gen.Graph, error) {
 	cfg.Schema = spec.PkgPath
 	if cfg.Package == "" {
 		// default package-path for codegen is one package

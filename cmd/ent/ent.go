@@ -19,6 +19,7 @@ func main() {
 		base.InitCmd(),
 		base.DescribeCmd(),
 		base.GenerateCmd(),
+		base.EdgeCmd(),
 	)
 	_ = cmd.Execute()
 }

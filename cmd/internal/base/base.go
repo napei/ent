@@ -13,6 +13,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+
 	"strings"
 	"text/template"
 	"unicode"
@@ -249,4 +250,148 @@ func examples(ex ...string) string {
 		ex[i] = "  " + ex[i] // indent each row with 2 spaces.
 	}
 	return strings.Join(ex, "\n")
+}
+
+func EdgeCmd() *cobra.Command {
+	var (
+		target string
+		cmd    = &cobra.Command{
+			Use:   "edge [flags] from to type",
+			Short: "generate an edge from one node to another",
+			Long:  "Generates an edge of a specific type from one entity to another.\nType must be one of O2O,O2M,M2O,M2M",
+			Example: examples(
+				// TODO Fill these in
+				"ent One Another O2M",
+				"ent Some Thing M2M",
+			),
+			Args: cobra.RangeArgs(3, 4),
+			Run: func(cmd *cobra.Command, args []string) {
+				var (
+					fromSchema string = args[0]
+					toSchema   string = args[1]
+					edgeType   gen.Rel
+				)
+
+				switch strings.ToUpper(args[2]) {
+				case gen.O2O.String():
+					edgeType = gen.O2O
+				case gen.O2M.String():
+					edgeType = gen.O2M
+				case gen.M2O.String():
+					edgeType = gen.M2O
+				case gen.M2M.String():
+					edgeType = gen.M2M
+				default:
+					edgeType = gen.Unk
+				}
+
+				if edgeType == gen.Unk {
+					log.Fatalf("unknown edge relation: %s", args[2])
+				}
+
+				graph, err := entc.LoadGraph(defaultSchema, &gen.Config{})
+				if err != nil {
+					panic(err)
+				}
+
+				for i := range graph.Schemas {
+					if graph.Schemas[i].Name == fromSchema {
+						for j := range graph.Schemas[i].Edges {
+							ref := &graph.Schemas[i].Edges[j]
+							if ref.Type == toSchema && ref.
+						}
+					}
+				}
+
+				// fset := token.NewFileSet()
+				// fromAst, err := parser.ParseFile(fset, strings.ToLower("./ent/schema/"+fromSchema+".go"), nil, 0)
+				// if err != nil {
+				// 	panic(err)
+				// }
+
+				// ast.Inspect(fromAst, func(node ast.Node) bool {
+				// 	switch n := node.(type) {
+				// 	case *ast.FuncDecl:
+				// 		if n.Name.String() == "Edges" {
+				// 			for i := range n.Body.List {
+				// 				switch s := n.Body.List[i].(type) {
+				// 				case *ast.ReturnStmt:
+				// 					goprinter.Fprint(os.Stdout, fset, s)
+				// 				}
+				// 			}
+				// 		}
+
+				// 	}
+				// 	return true
+				// })
+
+				// // If the target directory is not inferred from
+				// // the schema path, resolve its package path.
+				// if target != "" {
+				// 	pkgPath, err := PkgPath(DefaultConfig, target)
+				// 	if err != nil {
+				// 		log.Fatalln(err)
+				// 	}
+				// 	target = pkgPath
+				// }
+
+				// c := load.Config{Path: target}
+				// spec, err := c.Load()
+				// if err != nil {
+				// 	log.Fatalln(err)
+				// }
+
+				// graph, err := entc.LoadGraphFrom(spec, &gen.Config{})
+				// if err != nil {
+				// 	log.Fatalln(err)
+				// }
+
+				// driver, err := gen.NewStorage("sql")
+				// if err != nil {
+				// 	log.Fatalln(err)
+				// }
+
+				// graph, err := entc.LoadGraph(target, &gen.Config{Storage: driver})
+				// if err != nil {
+				// 	log.Fatalln(err)
+				// }
+
+				// for i := range graph.Schemas {
+				// 	if graph.Schemas[i].Name == fromSchema {
+				// 		//edge.To("pet", toSchema).Unique().Descriptor())
+				// 		graph.Schemas[i].Edges = append(graph.Schemas[i].Edges, load.NewEdge(&edge.Descriptor{
+				// 			Name:   "pet",
+				// 			Type:   toSchema,
+				// 			Unique: true,
+				// 		}))
+				// 	}
+
+				// 	if graph.Schemas[i].Name == toSchema {
+				// 		//edge.From("allergy", fromSchema).Unique().Ref("pet").Descriptor()
+				// 		graph.Schemas[i].Edges = append(graph.Schemas[i].Edges, load.NewEdge(&edge.Descriptor{
+				// 			Name:    "allergy",
+				// 			Type:    fromSchema,
+				// 			Unique:  true,
+				// 			RefName: "pet",
+				// 		}))
+				// 	}
+				// }
+
+				// if err := graph.Gen(); err != nil {
+				// 	log.Fatalln(err)
+				// }
+
+				// log.Println(graph)
+
+				log.Println("From: ", fromSchema)
+				log.Println("To: ", toSchema)
+				log.Println("Type: ", edgeType)
+
+			},
+		}
+	)
+
+	cmd.Flags().StringVar(&target, "target", defaultSchema, "target directory to look for schemas")
+
+	return cmd
 }
